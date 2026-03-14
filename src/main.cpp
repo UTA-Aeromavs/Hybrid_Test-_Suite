@@ -5,18 +5,25 @@
 #include "Relay_Valve.h"
 
 // put function declarations here:
-int myFunction(int, int);
+Relay_Valve relayOutput(1);
+Pressure_Transducer transducer1(A0);
+Pressure_Transducer transducer2(A1);
+int userInput = 0;
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  relayOutput.setState(0);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+  //relay test
+  while(Serial.available() == 0){}
+  userInput = Serial.parseInt();
+  relayOutput.setState(userInput);
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  transducer1.update();
+  transducer1.getVoltage();
+
+  transducer2.update();
+  transducer2.getVoltage();
+
 }
