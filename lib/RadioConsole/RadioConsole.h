@@ -7,19 +7,34 @@
 
 class RadioConsole {
   public:
-    RadioConsole(PhysicalLayer& radioRef, RemoteController* controllerPtr = 0);
+    using commandHandler = void(*)(String);
+    RadioConsole(PhysicalLayer& radioRef, commandHandler commands = noCommandHandler){
+        radio = &radioRef;
+        commandCallback = commands;
+        mode = MODE_RX;
+        rxFlag = false;
+        txFlag = false;
+        ackPending = false;
+        txInProgress = false;
+        inputPos = 0;
+        inputBuf[0] = '\0';
+        txBuf[0] = '\0';
+        lastRxBuf[0] = '\0';
+    }
 
     void begin(void);
     void run(void);
 
   private:
+    static void noCommandHandler(String s) {}
+
     enum Mode {
       MODE_RX = 0,
       MODE_TX
     };
 
     PhysicalLayer* radio;
-    RemoteController* controller;
+    commandHandler commandCallback;
     Mode mode;
 
     volatile bool rxFlag;
@@ -27,6 +42,7 @@ class RadioConsole {
 
     bool ackPending;
     bool txInProgress;
+    unsigned long testTime = 9999999;
 
     static const int INPUT_SIZE = 128;
     static const int MSG_SIZE   = 128;
@@ -35,6 +51,7 @@ class RadioConsole {
     int inputPos;
 
     char txBuf[MSG_SIZE];
+    int txLen = 0;
     char lastRxBuf[MSG_SIZE];
 
     static RadioConsole* activeInstance;
@@ -46,10 +63,11 @@ class RadioConsole {
     void onTxInterrupt(void);
 
     void enterReceiveMode(void);
-    void enterTransmitMode(const char* msg);
-
-    void handleSerial(void);
     void handleReceive(void);
+
+    void loadTxBuffer(const char* src);
+    void transmitBuffer();
+    void handleSerial(void);
     void handleTransmitDone(void);
 
     void clearInput(void);

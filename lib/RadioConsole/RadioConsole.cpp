@@ -1,22 +1,9 @@
 #include "RadioConsole.h"
 #include <string.h>
 #include <stdio.h>
+#include <Arduino.h>
 
 RadioConsole* RadioConsole::activeInstance = 0;
-
-RadioConsole::RadioConsole(PhysicalLayer& radioRef, RemoteController* controllerPtr) {
-  radio = &radioRef;
-  controller = controllerPtr;
-  mode = MODE_RX;
-  rxFlag = false;
-  txFlag = false;
-  ackPending = false;
-  txInProgress = false;
-  inputPos = 0;
-  inputBuf[0] = '\0';
-  txBuf[0] = '\0';
-  lastRxBuf[0] = '\0';
-}
 
 void RadioConsole::begin(void) {
   activeInstance = this;
@@ -29,6 +16,7 @@ void RadioConsole::run(void) {
   handleTransmitDone();
 }
 
+// ISR flags workaround
 void RadioConsole::rxISR(void) {
   if(activeInstance != 0) {
     activeInstance->onRxInterrupt();
@@ -49,6 +37,7 @@ void RadioConsole::onTxInterrupt(void) {
   txFlag = true;
 }
 
+// Recieve
 void RadioConsole::enterReceiveMode(void) {
   int state;
 
@@ -66,17 +55,35 @@ void RadioConsole::enterReceiveMode(void) {
   }
 }
 
-void RadioConsole::enterTransmitMode(const char* msg) {
+/*
+Transmission
+Transmission can either be done through serial input or automatically through buffer
+*/
+void RadioConsole::loadTxBuffer(const char* src) {
+  if(src == 0) {
+    txLen = 0;
+    txBuf[0] = '\0';
+    return;
+  }
+
+  size_t len = strlen(src);
+  if(len > MSG_SIZE - 1) {
+    len = MSG_SIZE - 1;
+  }
+
+  memcpy(txBuf, src, len);
+  txBuf[len] = '\0';
+  txLen = len;
+}
+
+void RadioConsole::transmitBuffer() {
   int state;
 
   radio->clearPacketReceivedAction();
   radio->clearPacketSentAction();
   radio->setPacketSentAction(txISR);
 
-  strncpy(txBuf, msg, MSG_SIZE - 1);
-  txBuf[MSG_SIZE - 1] = '\0';
-
-  state = radio->startTransmit(txBuf);
+  state = radio->startTransmit(txBuf, txLen);
   if(state != RADIOLIB_ERR_NONE) {
     Serial.print("startTransmit failed, code ");
     Serial.println(state);
@@ -88,42 +95,34 @@ void RadioConsole::enterTransmitMode(const char* msg) {
 }
 
 void RadioConsole::handleSerial(void) {
-  char c;
-  bool handled;
-
   while(Serial.available() > 0) {
-    c = (char)Serial.read();
+    char c = (char)Serial.read();
 
-    if(c == '\r' || c == '\n') {
-      if(inputPos > 0) {
+    if(c == '\n') {
+      continue;
+    }
+
+    if(c == '\r') {
+      if(inputPos > 0 && inputPos < INPUT_SIZE) {
         inputBuf[inputPos] = '\0';
-
-        handled = false;
-        if(controller != 0) {
-          handled = controller->handleSerialCommand(inputBuf);
-        }
-
-        if(!handled) {
-          if(!txInProgress) {
-            Serial.print("TX: ");
-            Serial.println(inputBuf);
-
-            ackPending = false;
-            enterTransmitMode(inputBuf);
-          } else {
-            Serial.println("Busy transmitting, input dropped");
-          }
-        }
       }
+      break;
+    }
 
-      clearInput();
+    if(inputPos < (INPUT_SIZE - 1)) {
+      inputBuf[inputPos] = c;
+      inputPos++;
     }
-    else {
-      if(inputPos < (INPUT_SIZE - 1)) {
-        inputBuf[inputPos] = c;
-        inputPos++;
-      }
-    }
+  }
+
+  if(!txInProgress && inputPos > 0 && inputBuf[inputPos] == '\0') {
+    Serial.print("TX: ");
+    Serial.println(inputBuf);
+
+    loadTxBuffer(inputBuf);
+    ackPending = false;
+    transmitBuffer();
+    clearInput();
   }
 }
 
@@ -138,28 +137,32 @@ void RadioConsole::handleReceive(void) {
   rxFlag = false;
 
   state = radio->readData(str);
-  if(state == RADIOLIB_ERR_NONE) {
-    str.toCharArray(lastRxBuf, MSG_SIZE);
-
-    Serial.print("RX: ");
-    Serial.println(lastRxBuf);
-
-    if(!startsWithAck(lastRxBuf) && !txInProgress) {
-      snprintf(txBuf, MSG_SIZE, "ACK:%s", lastRxBuf);
-      ackPending = true;
-      Serial.print("TX ACK: ");
-      Serial.println(txBuf);
-      enterTransmitMode(txBuf);
-      return;
-    }
-  } else if(state == RADIOLIB_ERR_CRC_MISMATCH) {
+  if(state == RADIOLIB_ERR_CRC_MISMATCH) {
     Serial.println("CRC mismatch");
-  } else {
+    enterReceiveMode();
+    return;
+  }
+  if(state != RADIOLIB_ERR_NONE) {
     Serial.print("readData failed, code ");
     Serial.println(state);
   }
+  str.toCharArray(lastRxBuf, MSG_SIZE);
 
-  enterReceiveMode();
+  Serial.print("RX: ");
+  Serial.println(lastRxBuf);
+  if(startsWithAck(lastRxBuf)){
+    enterReceiveMode();
+    return;
+  }
+  commandCallback(lastRxBuf);
+
+  ackPending = true;
+  char ackMsg[MSG_SIZE];
+  snprintf(ackMsg, MSG_SIZE, "ACK: %s", lastRxBuf);
+  Serial.print("TX: ");
+  Serial.println(ackMsg);
+  loadTxBuffer(ackMsg);
+  transmitBuffer();
 }
 
 void RadioConsole::handleTransmitDone(void) {

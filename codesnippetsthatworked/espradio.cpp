@@ -14,9 +14,10 @@ RadioConsole console(radio);
   ICACHE_RAM_ATTR
 #endif
 
+
+
 void setup() {
     Serial.begin(115200);
-    while(!Serial){delay(10);};
 
     Serial.println("ESP32");
 

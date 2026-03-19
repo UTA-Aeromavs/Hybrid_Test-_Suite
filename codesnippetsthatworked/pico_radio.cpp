@@ -11,15 +11,20 @@
 #define RADIO_RST_PIN 12
 // This is the busy pin
 #define RADIO_DIO1_PIN 2
+
+void commands(String message){
+  if(message == "Hello"){
+  }
+}
+
 SX1276 radio = new Module(RADIO_CS_PIN, RADIO_IRQ_PIN, RADIO_RST_PIN, RADIO_DIO1_PIN);
-RadioConsole console(radio);
+RadioConsole console(radio, commands);
 #if defined(ESP8266) || defined(ESP32)
   ICACHE_RAM_ATTR
 #endif
 
 void setup(){
     Serial.begin(115200);
-    while(!Serial){delay(10);};
     Serial.println("RPICO");
     // freq=915 MHz, BW=125 kHz, SF=7, CR=4/5, sync word 0x12
     int bootState = radio.begin(915.0, 125.0, 7, 5, 0x12, 10, 8, 0);
