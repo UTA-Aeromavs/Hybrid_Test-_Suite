@@ -1,7 +1,7 @@
 #include <Arduino.h>
 const float resistorValue = 100; // Change value of resistor to the actual resistance value
 const float minimumVoltage =  resistorValue * 0.1; //Change value for current
-const float maximumVoltage =  resistorValue * 1; //Change value for current
+const float maximumVoltage=  resistorValue * 1; //Change value for current
 const float maxPressure = 10000;
 
 void setup() {
