@@ -7,7 +7,8 @@
 #define Pressure_Transducer_Pin_2 A4
 #define HX711_DAT 2
 #define HX711_CLK 3
-#define Read_Enable A0
+#define Read_Enable 13
+#define Buzzer_Pin 4
 
 //bool getPinState();
 
@@ -22,6 +23,8 @@ void setup(){
     scale.begin(HX711_DAT,HX711_CLK);
     scale.tare();
     enablePin = analogRead(Read_Enable);
+    pinMode(Buzzer_Pin, OUTPUT);
+    pinMode(Read_Enable, INPUT);
 }
 /*Note:
 S=Scale
@@ -29,8 +32,14 @@ P1=Pressure Transducer 1
 P2=Pressure Transducer 2
 */
 void loop(){
+    while(!(digitalRead(Read_Enable))){
+        digitalWrite(Buzzer_Pin, LOW);
+    }
+    if((digitalRead(Read_Enable))){
+        digitalWrite(Buzzer_Pin, HIGH);
+    }
+    
     //Scale
-    while(enablePin < 820){}
     Serial.print("S, ");
     Serial.print(scale.update());
     Serial.print(", ");
@@ -40,12 +49,12 @@ void loop(){
     Serial.print("P1, ");
     Serial.print(Pressure_Transducer_1.update());
     Serial.print(", ");
-    Serial.println(Pressure_Transducer_1.getRawVoltage());
+    Serial.println(Pressure_Transducer_1.getRawValue());
     
     //Pressure Transducer 2
     Serial.print("P2, ");
     Serial.print(Pressure_Transducer_2.update());
     Serial.print(", ");
-    Serial.println(Pressure_Transducer_2.getRawVoltage());
+    Serial.println(Pressure_Transducer_2.getRawValue());
 
 }

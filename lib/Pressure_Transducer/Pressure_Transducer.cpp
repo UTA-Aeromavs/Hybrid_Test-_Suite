@@ -10,7 +10,9 @@ unsigned long Pressure_Transducer::update(){
     ADC_Value = analogRead(pin);
     return micros();
 }
-
+int Pressure_Transducer::getRawValue(){
+    return ADC_Value;
+}
 double Pressure_Transducer::getRawVoltage(){
     RawVoltage = ((ADC_Value/ADC_STEPS)*V_REF);
     return RawVoltage;
