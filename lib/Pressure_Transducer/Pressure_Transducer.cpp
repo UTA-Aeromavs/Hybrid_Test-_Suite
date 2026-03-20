@@ -4,7 +4,7 @@ Pressure_Transducer::Pressure_Transducer(int inputPin){
     pin = inputPin;
     pinMode(inputPin, INPUT);
     analogReference(AR_INTERNAL); //Note Max input is 1.5V
-    analogReadResolution(12);
+    analogReadResolution(14);
 }
 unsigned long Pressure_Transducer::update(){
     ADC_Value = analogRead(pin);
