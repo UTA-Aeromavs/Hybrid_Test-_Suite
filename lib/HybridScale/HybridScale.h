@@ -9,4 +9,4 @@ class HybridScale : public HX711{
     public:
         unsigned long update();
         double getRawForce();
-}
+};

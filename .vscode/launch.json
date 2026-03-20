@@ -12,11 +12,11 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "C:/Code/Hybrid_Test-_Suite/.pio/build/uno_r4_wifi/firmware.elf",
+            "executable": "C:/Users/alyhh/Documents/PlatformIO/Projects/Hybrid_Test-_Suite/.pio/build/uno_r4_wifi/firmware.elf",
             "projectEnvName": "uno_r4_wifi",
-            "toolchainBinDir": "C:/Users/Nick/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "toolchainBinDir": "C:/Users/alyhh/.platformio/packages/toolchain-gccarmnoneeabi/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/Nick/.platformio/platforms/renesas-ra/misc/svd/R7FA4M1AB.svd",
+            "svdPath": "C:/Users/alyhh/.platformio/platforms/renesas-ra/misc/svd/R7FA4M1AB.svd",
             "preLaunchTask": {
                 "type": "PlatformIO",
                 "task": "Pre-Debug (uno_r4_wifi)"
@@ -26,21 +26,21 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "C:/Code/Hybrid_Test-_Suite/.pio/build/uno_r4_wifi/firmware.elf",
+            "executable": "C:/Users/alyhh/Documents/PlatformIO/Projects/Hybrid_Test-_Suite/.pio/build/uno_r4_wifi/firmware.elf",
             "projectEnvName": "uno_r4_wifi",
-            "toolchainBinDir": "C:/Users/Nick/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "toolchainBinDir": "C:/Users/alyhh/.platformio/packages/toolchain-gccarmnoneeabi/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/Nick/.platformio/platforms/renesas-ra/misc/svd/R7FA4M1AB.svd"
+            "svdPath": "C:/Users/alyhh/.platformio/platforms/renesas-ra/misc/svd/R7FA4M1AB.svd"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "C:/Code/Hybrid_Test-_Suite/.pio/build/uno_r4_wifi/firmware.elf",
+            "executable": "C:/Users/alyhh/Documents/PlatformIO/Projects/Hybrid_Test-_Suite/.pio/build/uno_r4_wifi/firmware.elf",
             "projectEnvName": "uno_r4_wifi",
-            "toolchainBinDir": "C:/Users/Nick/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "toolchainBinDir": "C:/Users/alyhh/.platformio/packages/toolchain-gccarmnoneeabi/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/Nick/.platformio/platforms/renesas-ra/misc/svd/R7FA4M1AB.svd",
+            "svdPath": "C:/Users/alyhh/.platformio/platforms/renesas-ra/misc/svd/R7FA4M1AB.svd",
             "loadMode": "manual"
         }
     ]
