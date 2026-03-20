@@ -7,6 +7,7 @@
 #define Pressure_Transducer_Pin_2 A4
 #define HX711_DAT 2
 #define HX711_CLK 3
+#define Read_Enable A0
 
 //bool getPinState();
 
@@ -14,11 +15,13 @@
 HybridScale scale;
 Pressure_Transducer Pressure_Transducer_1 = Pressure_Transducer(Pressure_Transducer_Pin_1);
 Pressure_Transducer Pressure_Transducer_2 = Pressure_Transducer(Pressure_Transducer_Pin_1);
+int enablePin; 
 
 void setup(){
     Serial.begin(115200);
     scale.begin(HX711_DAT,HX711_CLK);
     scale.tare();
+    enablePin = analogRead(Read_Enable);
 }
 /*Note:
 S=Scale
@@ -27,6 +30,7 @@ P2=Pressure Transducer 2
 */
 void loop(){
     //Scale
+    while(enablePin < 820){}
     Serial.print("S, ");
     Serial.print(scale.update());
     Serial.print(", ");
