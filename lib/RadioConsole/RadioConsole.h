@@ -24,6 +24,7 @@ class RadioConsole {
 
     void begin(void);
     void run(void);
+    bool sendMessage(const String& message);
 
   private:
     static void noCommandHandler(String s) {}
