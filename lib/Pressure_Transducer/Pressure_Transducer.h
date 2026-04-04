@@ -18,6 +18,7 @@ class Pressure_Transducer{
     public:
         Pressure_Transducer(int inputPin);
         unsigned long update();
+        int getRawValue();
         double getRawVoltage();
         double getVoltage();
         double getPressure();

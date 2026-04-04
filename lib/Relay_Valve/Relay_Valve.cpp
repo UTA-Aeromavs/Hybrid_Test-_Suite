@@ -12,6 +12,3 @@ void Relay_Valve::setState(bool state){
         digitalWrite(pin, LOW);
     }
 }
-void Relay_Valve::timedOpen(int time){
-       
-}

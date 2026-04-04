@@ -1,40 +1,60 @@
-#include <Wire.h>
+#include <Arduino.h>
+//#include "Relay_Valve.h"
+#include "HybridScale.h"
+#include "Pressure_Transducer.h"
 
-struct Telemetry {
-  int16_t p1;
-  int16_t p2;
-  int16_t w1;
-};
+#define Pressure_Transducer_Pin_1 A5
+#define Pressure_Transducer_Pin_2 A4
+#define HX711_DAT 2
+#define HX711_CLK 3
+#define Read_Enable 13
+#define Buzzer_Pin 4
 
-// Internal values
-volatile int16_t g_p1 = 100;
-volatile int16_t g_p2 = 200;
-volatile int16_t g_w1 = 300;
+//bool getPinState();
 
-// Function you can call anywhere in your code
-Telemetry getTelemetry() {
-  Telemetry t;
-  t.p1 = g_p1;
-  t.p2 = g_p2;
-  t.w1 = g_w1;
-  return t;
+//Logic detect
+HybridScale scale;
+Pressure_Transducer Pressure_Transducer_1 = Pressure_Transducer(Pressure_Transducer_Pin_1);
+Pressure_Transducer Pressure_Transducer_2 = Pressure_Transducer(Pressure_Transducer_Pin_1);
+int enablePin; 
+
+void setup(){
+    Serial.begin(115200);
+    scale.begin(HX711_DAT,HX711_CLK);
+    scale.tare();
+    enablePin = analogRead(Read_Enable);
+    pinMode(Buzzer_Pin, OUTPUT);
+    pinMode(Read_Enable, INPUT);
 }
+/*Note:
+S=Scale
+P1=Pressure Transducer 1
+P2=Pressure Transducer 2
+*/
+void loop(){
+    while(!(digitalRead(Read_Enable))){
+        digitalWrite(Buzzer_Pin, LOW);
+    }
+    if((digitalRead(Read_Enable))){
+        digitalWrite(Buzzer_Pin, HIGH);
+    }
+    
+    //Scale
+    Serial.print("S, ");
+    Serial.print(scale.update());
+    Serial.print(", ");
+    Serial.println(scale.getRawForce());
+    
+    //Pressure Transducer 1
+    Serial.print("P1, ");
+    Serial.print(Pressure_Transducer_1.update());
+    Serial.print(", ");
+    Serial.println(Pressure_Transducer_1.getRawValue());
+    
+    //Pressure Transducer 2
+    Serial.print("P2, ");
+    Serial.print(Pressure_Transducer_2.update());
+    Serial.print(", ");
+    Serial.println(Pressure_Transducer_2.getRawValue());
 
-// Called when I2C master asks for data
-void onI2CRequest() {
-  Telemetry t = getTelemetry();
-  Wire.write((uint8_t*)&t, sizeof(t));
-}
-
-void setup() {
-  Wire.begin(0x12);   // slave address
-  Wire.onRequest(onI2CRequest);
-}
-
-void loop() {
-  // Example updates
-  g_p1++;
-  g_p2 += 2;
-  g_w1 += 3;
-  delay(100);
 }
